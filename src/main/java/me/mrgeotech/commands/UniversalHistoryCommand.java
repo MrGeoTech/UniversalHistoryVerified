@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrgeotech.main.BookHandler;
+import me.mrgeotech.main.UUIDFetcher;
 import me.mrgeotech.main.UniversalHistory;
 import net.md_5.bungee.api.ChatColor;
 
@@ -48,8 +48,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 		}
 		if (type.equalsIgnoreCase("check")) {
 			try {
-				@SuppressWarnings("deprecation")
-				ResultSet rs = this.main.getServerConnector().getPlayerData(Bukkit.getOfflinePlayer(player).getUniqueId().toString());
+				ResultSet rs = this.main.getServerConnector().getPlayerData(UUIDFetcher.getUUIDOf(player).toString());
 				ArrayList<String> playerUUID = new ArrayList<String>();
 				ArrayList<String> playerName = new ArrayList<String>();
 				ArrayList<String> staffUUID = new ArrayList<String>();
@@ -57,7 +56,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				ArrayList<String> serverIP = new ArrayList<String>();
 				ArrayList<String> date = new ArrayList<String>();
 				ArrayList<String> ptype = new ArrayList<String>();
-				ArrayList<String> reason = new ArrayList<String>();
+				ArrayList<String> reason = new ArrayList<String>();stop
 				while (rs.next()) {
 					playerUUID.add(rs.getString("PlayerUUID"));
 					playerName.add(rs.getString("PlayerName"));
