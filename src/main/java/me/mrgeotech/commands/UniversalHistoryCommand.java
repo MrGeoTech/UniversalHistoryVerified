@@ -23,12 +23,17 @@ public class UniversalHistoryCommand implements CommandExecutor {
 	
 	public UniversalHistoryCommand(UniversalHistory main) {
 		this.main = main;
+		this.main.getCommand("uh").setExecutor(this);
 		books = new HashMap<Player,ItemStack>();
 		prev = new HashMap<Player,ItemStack>();
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (!sender.hasPermission("uh.admin.uh")) {
+			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cI'm sorry but you don't have sufficient permissions to execute this command. If you think that this is an error, contact the server administrator."));
+			return true;
+		}
 		if (args.length != 2) {
 			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4Improper usage! /uh <check/add> <name>"));
 			return true;
@@ -64,7 +69,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				if (sender instanceof Player) {
 					ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
 					Player staff = (Player) sender;
-					prev.put(staff, staff.getItemInHand());
+					prev.put(staff, staff.getInventory().getItemInMainHand());
 					books.put(staff, book);
 				} else {
 					

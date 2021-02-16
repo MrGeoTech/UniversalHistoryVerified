@@ -6,11 +6,14 @@ import java.net.ServerSocket;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.mrgeotech.commands.UniversalHistoryCommand;
 import net.md_5.bungee.api.ChatColor;
 
 public class UniversalHistory extends JavaPlugin {
 	
 	private ServerConnector sc;
+	@SuppressWarnings("unused")
+	private UniversalHistoryCommand uhc;
 	
 	@Override
 	public void onEnable() {
@@ -19,6 +22,7 @@ public class UniversalHistory extends JavaPlugin {
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
 		sc = new ServerConnector();
+		uhc = new UniversalHistoryCommand(this);
 	}
 	
 	@Override

@@ -1,0 +1,24 @@
+main: me.mrgeotech.main.UniversalHistory
+name: UniversalHistory
+version: 1.0
+author: MrGeoTech
+api-version: 1.13
+description: A punishment history plugin that has a central database to allow for servers to see the players total history.
+
+permissions:
+  uh.*:
+    children:
+      uh.admin: true
+      uh.admin.uh: true
+  uh.admin.*:
+    children:
+      uh.admin.uh: true
+  uh.admin.uh: 
+    description: Allows use of the main command of this plugin.
+
+commands:
+  uh:
+    description: Main command for the Universal History plugin.
+    aliases: universalhistory
+    permission: uh.admin.uh                                                                                                                                                                                                                                
+    permission-message: I'm sorry but you do not have permission to use this command. If you think that this is an error, please contact the server administrator.
