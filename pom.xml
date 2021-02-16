@@ -27,6 +27,11 @@
 </repositories>
 
   <dependencies>
+  <dependency>
+    <groupId>com.googlecode.json-simple</groupId>
+    <artifactId>json-simple</artifactId>
+    <version>1.1.1</version>
+  </dependency>
     <!--This adds the Spigot API artifact to the build -->
     <dependency>
            <groupId>org.spigotmc</groupId>
