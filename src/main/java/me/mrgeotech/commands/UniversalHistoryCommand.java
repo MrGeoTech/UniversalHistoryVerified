@@ -1,6 +1,7 @@
 package me.mrgeotech.commands;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -47,7 +48,8 @@ public class UniversalHistoryCommand implements CommandExecutor {
 		}
 		if (type.equalsIgnoreCase("check")) {
 			try {
-				ResultSet rs = this.main.getServerConnector().getPlayerData(Bukkit.getPlayer(player).getUniqueId().toString());
+				@SuppressWarnings("deprecation")
+				ResultSet rs = this.main.getServerConnector().getPlayerData(Bukkit.getOfflinePlayer(player).getUniqueId().toString());
 				ArrayList<String> playerUUID = new ArrayList<String>();
 				ArrayList<String> playerName = new ArrayList<String>();
 				ArrayList<String> staffUUID = new ArrayList<String>();
@@ -74,7 +76,11 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				} else {
 					
 				}
-			} catch (Exception e) {
+			} catch (NullPointerException e) {
+				sender.sendMessage(ChatColor.RED + "An error occured getting the UUID of the player. Please make sure that the player is online.");
+				e.printStackTrace();
+				return false;
+			} catch (SQLException e) {
 				e.printStackTrace();
 				return false;
 			}
