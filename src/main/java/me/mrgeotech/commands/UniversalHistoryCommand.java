@@ -61,11 +61,13 @@ public class UniversalHistoryCommand implements CommandExecutor {
 					try {
 						String uuid = UUIDFetcher.getUUIDOf(player).toString();
 						Socket server = new Socket(IP, PORT);
+						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
+						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
 						String[] out = new String[2];
 						out[0] = "get";
 						out[1] = uuid;
-						new ObjectOutputStream(server.getOutputStream()).writeObject(out);
-						ResultSet rs = (ResultSet) new ObjectInputStream(server.getInputStream()).readObject();
+						outStream.writeObject(out);
+						ResultSet rs = (ResultSet) inStream.readObject();
 						server.close();
 						ArrayList<String> playerUUID = new ArrayList<String>();
 						ArrayList<String> playerName = new ArrayList<String>();
