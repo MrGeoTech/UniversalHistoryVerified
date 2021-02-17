@@ -11,7 +11,6 @@ import net.md_5.bungee.api.ChatColor;
 
 public class UniversalHistory extends JavaPlugin {
 	
-	private ServerConnector sc;
 	@SuppressWarnings("unused")
 	private UniversalHistoryCommand uhc;
 	
@@ -21,17 +20,12 @@ public class UniversalHistory extends JavaPlugin {
 			this.getServer().broadcastMessage(ChatColor.RED + "Could not enable plugin \"UniversalHistory\" because port 50000 is either in use or closed!");
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
-		sc = new ServerConnector();
 		uhc = new UniversalHistoryCommand(this);
 	}
 	
 	@Override
 	public void onDisable() {
 		
-	}
-	
-	public ServerConnector getServerConnector() {
-		return sc;
 	}
 	
 	public boolean available(int port) {
