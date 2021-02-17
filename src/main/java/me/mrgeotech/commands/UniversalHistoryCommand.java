@@ -1,10 +1,15 @@
 package me.mrgeotech.commands;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,6 +23,9 @@ import net.md_5.bungee.api.ChatColor;
 
 public class UniversalHistoryCommand implements CommandExecutor {
 	
+	private static final String IP = "localhost";
+	private static final int PORT = 50000;
+	
 	private UniversalHistory main;
 	public static HashMap<Player,ItemStack> books;
 	public static HashMap<Player,ItemStack> prev;
@@ -30,7 +38,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 	}
 
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+	public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
 		if (!sender.hasPermission("uh.admin.uh")) {
 			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cI'm sorry but you don't have sufficient permissions to execute this command. If you think that this is an error, contact the server administrator."));
 			return true;
@@ -47,45 +55,58 @@ public class UniversalHistoryCommand implements CommandExecutor {
 			return true;
 		}
 		if (type.equalsIgnoreCase("check")) {
-			try {
-				ResultSet rs = this.main.getServerConnector().getPlayerData(UUIDFetcher.getUUIDOf(player).toString());
-				ArrayList<String> playerUUID = new ArrayList<String>();
-				ArrayList<String> playerName = new ArrayList<String>();
-				ArrayList<String> staffUUID = new ArrayList<String>();
-				ArrayList<String> staffName = new ArrayList<String>();
-				ArrayList<String> serverIP = new ArrayList<String>();
-				ArrayList<String> date = new ArrayList<String>();
-				ArrayList<String> ptype = new ArrayList<String>();
-				ArrayList<String> reason = new ArrayList<String>();stop
-				while (rs.next()) {
-					playerUUID.add(rs.getString("PlayerUUID"));
-					playerName.add(rs.getString("PlayerName"));
-					staffUUID.add(rs.getString("StaffUUID"));
-					staffName.add(rs.getString("StaffName"));
-					serverIP.add(rs.getString("ServerIP"));
-					date.add(rs.getString("Date"));
-					ptype.add(rs.getString("Type"));
-					reason.add(rs.getString("Reason"));
+			Bukkit.getScheduler().runTaskAsynchronously(this.main, new Runnable() {
+				@Override
+				public void run() {
+					try {
+						String uuid = UUIDFetcher.getUUIDOf(player).toString();
+						Socket server = new Socket(IP, PORT);
+						new ObjectOutputStream(server.getOutputStream()).writeUTF("SELECT * FROM Hisotries WHERE playeruuid='" + uuid + "';");
+						ResultSet rs = (ResultSet) new ObjectInputStream(server.getInputStream()).readObject();
+						server.close();
+						ArrayList<String> playerUUID = new ArrayList<String>();
+						ArrayList<String> playerName = new ArrayList<String>();
+						ArrayList<String> staffUUID = new ArrayList<String>();
+						ArrayList<String> staffName = new ArrayList<String>();
+						ArrayList<String> serverIP = new ArrayList<String>();
+						ArrayList<String> date = new ArrayList<String>();
+						ArrayList<String> ptype = new ArrayList<String>();
+						ArrayList<String> reason = new ArrayList<String>();
+						while (rs.next()) {
+							playerUUID.add(rs.getString("PlayerUUID"));
+							playerName.add(rs.getString("PlayerName"));
+							staffUUID.add(rs.getString("StaffUUID"));
+							staffName.add(rs.getString("StaffName"));
+							serverIP.add(rs.getString("ServerIP"));
+							date.add(rs.getString("Date"));
+							ptype.add(rs.getString("Type"));
+							reason.add(rs.getString("Reason"));
+						}	
+						if (sender instanceof Player) {
+							ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
+							Player staff = (Player) sender;
+							prev.put(staff, staff.getInventory().getItemInMainHand());
+							books.put(staff, book);
+						} else {
+							if (playerUUID.size() != 0) {
+								for (int i = 0; playerUUID.size() < i; i++) {
+									System.out.println(ChatColor.translateAlternateColorCodes('&', "&5" + playerName.get(i) + "&f(&d" + playerUUID.get(i) + "&f) has a &c" + ptype.get(i) + "&f on &5" + serverIP.get(i) + "&f, given by &5" + staffName.get(i) + "&f(&d" + staffUUID.get(i) + "&f) for \"&a" + reason.get(i) + "&f\" at &2" + date.get(i)));
+								}
+							} else {
+								System.out.println(ChatColor.RED + "There was no history for " + playerName.get(0) + " in our database.");
+							}
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}	
 				}
-				if (sender instanceof Player) {
-					ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
-					Player staff = (Player) sender;
-					prev.put(staff, staff.getInventory().getItemInMainHand());
-					books.put(staff, book);
-				} else {
-					
-				}
-			} catch (NullPointerException e) {
-				sender.sendMessage(ChatColor.RED + "An error occured getting the UUID of the player. Please make sure that the player is online.");
-				e.printStackTrace();
-				return false;
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return false;
-			}
+			});
 			return true;
 		}
 		return false;
 	}
-	
 }
