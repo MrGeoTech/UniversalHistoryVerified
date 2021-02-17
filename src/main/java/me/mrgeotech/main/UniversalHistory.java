@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.mrgeotech.commands.UniversalHistoryCommand;
-import net.md_5.bungee.api.ChatColor;
 
 public class UniversalHistory extends JavaPlugin {
 	
@@ -17,8 +16,7 @@ public class UniversalHistory extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		if (!this.available(50000)) {
-			this.getServer().broadcastMessage(ChatColor.RED + "Could not enable plugin \"UniversalHistory\" because port 50000 is either in use or closed!");
-			this.getServer().getPluginManager().disablePlugin(this);
+			System.err.println("Port 50000 is not open! This plugin will not be able to get any information from the database. Please open port 50000 or you WILL get errors!");
 		}
 		uhc = new UniversalHistoryCommand(this);
 	}
