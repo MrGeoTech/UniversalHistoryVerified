@@ -2,11 +2,12 @@ main: me.mrgeotech.main.UniversalHistory
 name: UniversalHistory
 version: 1.0
 author: MrGeoTech
-api-version: 1.13
+api-version: "1.13"
 description: A punishment history plugin that has a central database to allow for servers to see the players total history.
 
 permissions:
   uh.*:
+    defualt: op
     children:
       uh.admin: true
       uh.admin.uh: true

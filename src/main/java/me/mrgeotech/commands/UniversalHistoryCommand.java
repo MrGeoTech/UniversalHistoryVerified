@@ -55,6 +55,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 		}
 		if (type.equalsIgnoreCase("check")) {
 			Bukkit.getScheduler().runTaskAsynchronously(this.main, new Runnable() {
+				@SuppressWarnings("deprecation")
 				@Override
 				public void run() {
 					try {
@@ -89,10 +90,18 @@ public class UniversalHistoryCommand implements CommandExecutor {
 							reason.add(in.get(i + 7));
 						}
 						if (sender instanceof Player) {
-							ItemStack book = new BookHandler(player, playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
-							Player staff = (Player) sender;
-							prev.put(staff, staff.getInventory().getItemInMainHand());
-							books.put(staff, book);
+							if (playerUUID.size() != 0) {
+								ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
+								Player staff = (Player) sender;
+								if (Bukkit.getBukkitVersion().split("-")[0].equalsIgnoreCase("1.8")) {
+									prev.put(staff, staff.getItemInHand());
+								} else {
+									prev.put(staff, staff.getInventory().getItemInMainHand());
+								}
+								books.put(staff, book);
+							} else {
+								sender.sendMessage(ChatColor.RED + "There was no history for " + player + " in our database.");
+							}
 						} else {
 							if (playerUUID.size() != 0) {
 								for (int i = 0; playerUUID.size() > i; i++) {
