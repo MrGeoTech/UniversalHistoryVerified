@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -67,7 +65,8 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						out[0] = "get";
 						out[1] = uuid;
 						outStream.writeObject(out);
-						ResultSet rs = (ResultSet) inStream.readObject();
+						@SuppressWarnings("unchecked")
+						ArrayList<String> in = (ArrayList<String>) inStream.readObject();
 						server.close();
 						ArrayList<String> playerUUID = new ArrayList<String>();
 						ArrayList<String> playerName = new ArrayList<String>();
@@ -77,16 +76,16 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						ArrayList<String> date = new ArrayList<String>();
 						ArrayList<String> ptype = new ArrayList<String>();
 						ArrayList<String> reason = new ArrayList<String>();
-						while (rs.next()) {
-							playerUUID.add(rs.getString("PlayerUUID"));
-							playerName.add(rs.getString("PlayerName"));
-							staffUUID.add(rs.getString("StaffUUID"));
-							staffName.add(rs.getString("StaffName"));
-							serverIP.add(rs.getString("ServerIP"));
-							date.add(rs.getString("Date"));
-							ptype.add(rs.getString("Type"));
-							reason.add(rs.getString("Reason"));
-						}	
+						for (int i = 0; (in.size() / 8) > i; i++) {
+							playerUUID.add(in.get(i));
+							playerName.add(in.get(i + 1));
+							staffUUID.add(in.get(i + 2));
+							staffName.add(in.get(i + 3));
+							serverIP.add(in.get(i + 4));
+							date.add(in.get(i + 5));
+							ptype.add(in.get(i + 6));
+							reason.add(in.get(i + 7));
+						}
 						if (sender instanceof Player) {
 							ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
 							Player staff = (Player) sender;
@@ -94,7 +93,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 							books.put(staff, book);
 						} else {
 							if (playerUUID.size() != 0) {
-								for (int i = 0; playerUUID.size() < i; i++) {
+								for (int i = 0; playerUUID.size() > i; i++) {
 									System.out.println(ChatColor.translateAlternateColorCodes('&', "&5" + playerName.get(i) + "&f(&d" + playerUUID.get(i) + "&f) has a &c" + ptype.get(i) + "&f on &5" + serverIP.get(i) + "&f, given by &5" + staffName.get(i) + "&f(&d" + staffUUID.get(i) + "&f) for \"&a" + reason.get(i) + "&f\" at &2" + date.get(i)));
 								}
 							} else {
@@ -105,9 +104,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						e.printStackTrace();
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}	
+					}
 				}
 			});
 			return true;
