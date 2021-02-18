@@ -1,5 +1,6 @@
 package me.mrgeotech.commands;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -59,6 +60,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				public void run() {
 					try {
 						String uuid = UUIDFetcher.getUUIDOf(player).toString();
+						System.out.println(uuid);
 						Socket server = new Socket(IP, PORT);
 						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
 						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
