@@ -1,5 +1,6 @@
 package me.mrgeotech.commands;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -58,6 +59,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				public void run() {
 					try {
 						String uuid = UUIDFetcher.getUUIDOf(player).toString();
+						System.out.println(uuid);
 						Socket server = new Socket(IP, PORT);
 						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
 						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
@@ -87,7 +89,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 							reason.add(in.get(i + 7));
 						}
 						if (sender instanceof Player) {
-							ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
+							ItemStack book = new BookHandler(player, playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
 							Player staff = (Player) sender;
 							prev.put(staff, staff.getInventory().getItemInMainHand());
 							books.put(staff, book);
@@ -97,7 +99,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 									System.out.println(ChatColor.translateAlternateColorCodes('&', "&5" + playerName.get(i) + "&f(&d" + playerUUID.get(i) + "&f) has a &c" + ptype.get(i) + "&f on &5" + serverIP.get(i) + "&f, given by &5" + staffName.get(i) + "&f(&d" + staffUUID.get(i) + "&f) for \"&a" + reason.get(i) + "&f\" at &2" + date.get(i)));
 								}
 							} else {
-								System.out.println(ChatColor.RED + "There was no history for " + playerName.get(0) + " in our database.");
+								System.out.println(ChatColor.RED + "There was no history for " + player + " in our database.");
 							}
 						}
 					} catch (IOException e) {
