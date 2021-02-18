@@ -34,12 +34,12 @@ public class BookHandler {
 		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
 		BookMeta meta = (BookMeta) book.getItemMeta();
 		
-		meta.setPage(0, color("&0This is the punishment history of &b" + this.playerName.get(0) + "&0. Each page represents a punishment they have recived on other servers."));;
+		meta.addPage(color("&0This is the punishment history of &b" + this.playerName.get(0) + "&0. Each page represents a punishment they have recived on other servers."));;
 		meta.setAuthor("UniversalHistory");
-		meta.setDisplayName(playerName.get(1) + "'s History");
-		meta.setTitle(playerName.get(1) + "'s History");
+		meta.setDisplayName(playerName.get(0) + "'s History");
+		meta.setTitle(playerName.get(0) + "'s History");
 		if (playerUUID.size() != 0) {
-			for (int i = 0; playerUUID.size() < i; i++) {
+			for (int i = 0; playerUUID.size() > i; i++) {
 				meta.addPage(color("&5" + playerName.get(i) + "&0(&d" + playerUUID.get(i) + "&0) has a &c" + type.get(i) + "&0 on &5" + serverIP.get(i) + "&0, given by &5" + staffName.get(i) + "&0(&d" + staffUUID.get(i) + "&0) for \"&a" + reason.get(i) + "&0\" at &2" + date.get(i)));
 			}
 		} else {
