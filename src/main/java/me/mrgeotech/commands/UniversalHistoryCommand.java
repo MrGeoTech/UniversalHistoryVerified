@@ -1,5 +1,6 @@
 package me.mrgeotech.commands;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -60,6 +61,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				public void run() {
 					try {
 						String uuid = UUIDFetcher.getUUIDOf(player).toString();
+						System.out.println(uuid);
 						Socket server = new Socket(IP, PORT);
 						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
 						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
@@ -67,7 +69,12 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						out[0] = "get";
 						out[1] = uuid;
 						outStream.writeObject(out);
-						ResultSet rs = (ResultSet) inStream.readObject();
+						ResultSet rs;
+						try {
+							rs = (ResultSet) inStream.readObject();
+						} catch (EOFException e) {
+							rs = null;
+						}
 						server.close();
 						ArrayList<String> playerUUID = new ArrayList<String>();
 						ArrayList<String> playerName = new ArrayList<String>();
@@ -77,18 +84,20 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						ArrayList<String> date = new ArrayList<String>();
 						ArrayList<String> ptype = new ArrayList<String>();
 						ArrayList<String> reason = new ArrayList<String>();
-						while (rs.next()) {
-							playerUUID.add(rs.getString("PlayerUUID"));
-							playerName.add(rs.getString("PlayerName"));
-							staffUUID.add(rs.getString("StaffUUID"));
-							staffName.add(rs.getString("StaffName"));
-							serverIP.add(rs.getString("ServerIP"));
-							date.add(rs.getString("Date"));
-							ptype.add(rs.getString("Type"));
-							reason.add(rs.getString("Reason"));
-						}	
+						if (rs != null) {
+							while (rs.next()) {
+								playerUUID.add(rs.getString("PlayerUUID"));
+								playerName.add(rs.getString("PlayerName"));
+								staffUUID.add(rs.getString("StaffUUID"));
+								staffName.add(rs.getString("StaffName"));
+								serverIP.add(rs.getString("ServerIP"));
+								date.add(rs.getString("Date"));
+								ptype.add(rs.getString("Type"));
+								reason.add(rs.getString("Reason"));
+							}
+						}
 						if (sender instanceof Player) {
-							ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
+							ItemStack book = new BookHandler(player, playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
 							Player staff = (Player) sender;
 							prev.put(staff, staff.getInventory().getItemInMainHand());
 							books.put(staff, book);
@@ -98,7 +107,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 									System.out.println(ChatColor.translateAlternateColorCodes('&', "&5" + playerName.get(i) + "&f(&d" + playerUUID.get(i) + "&f) has a &c" + ptype.get(i) + "&f on &5" + serverIP.get(i) + "&f, given by &5" + staffName.get(i) + "&f(&d" + staffUUID.get(i) + "&f) for \"&a" + reason.get(i) + "&f\" at &2" + date.get(i)));
 								}
 							} else {
-								System.out.println(ChatColor.RED + "There was no history for " + playerName.get(0) + " in our database.");
+								System.out.println(ChatColor.RED + "There was no history for " + player + " in our database.");
 							}
 						}
 					} catch (IOException e) {
