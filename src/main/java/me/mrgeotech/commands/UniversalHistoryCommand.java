@@ -1,6 +1,5 @@
 package me.mrgeotech.commands;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -91,7 +90,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						}
 						if (sender instanceof Player) {
 							if (playerUUID.size() != 0) {
-								ItemStack book = new BookHandler(playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
+								ItemStack book = new BookHandler(player, playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
 								Player staff = (Player) sender;
 								if (Bukkit.getBukkitVersion().split("-")[0].equalsIgnoreCase("1.8")) {
 									prev.put(staff, staff.getItemInHand());
