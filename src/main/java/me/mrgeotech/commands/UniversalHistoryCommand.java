@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
@@ -36,7 +39,7 @@ public class UniversalHistoryCommand implements CommandExecutor {
 			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cI'm sorry but you don't have sufficient permissions to execute this command. If you think that this is an error, contact the server administrator."));
 			return true;
 		}
-		if (args.length != 2) {
+		if (!(args.length == 2 || args.length == 9)) {
 			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4Improper usage! /uh <check/add> <name>"));
 			return true;
 		}
@@ -115,6 +118,52 @@ public class UniversalHistoryCommand implements CommandExecutor {
 				}
 			});
 			return true;
+		}
+		if (type.equalsIgnoreCase("add")) {
+			final String staff = args[2];
+			final String punishment = args[3];
+			final String reason = args[4];
+			final String length;
+			if (args.length == 6) {
+				length = args[5];
+			} else {
+				length = null;
+			}
+			Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
+				@Override
+				public void run() {
+					try {
+						String uuid;
+						String staffUUID;
+						try {
+							uuid = UUIDFetcher.getUUIDOf(player).toString();
+							staffUUID = UUIDFetcher.getUUIDOf(staff).toString();
+						} catch (Exception e) {
+							System.err.println(sender.getName() + " tried to get the uuid of " + player + " which could not be found/doesn't exist!");
+							sender.sendMessage(ChatColor.RED + player + "'s uuid could not be found/doesn't exist!");
+							return;
+						}
+						Socket server = new Socket(IP, PORT);
+						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
+						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
+						String[] out = {"add",
+								uuid,
+								player,
+								staffUUID,
+								staff,
+								Bukkit.getIp(),
+								ZonedDateTime.ofInstant(Instant.now(), ZoneId.of("America/Chicago")).toString(),
+								(args.length == 6) ? punishment : punishment + "(Length=" + length + ")",
+								reason};
+						outStream.writeObject(out);
+						String response = inStream.readUTF();
+						sender.sendMessage(response);
+						server.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
 		}
 		return false;
 	}
