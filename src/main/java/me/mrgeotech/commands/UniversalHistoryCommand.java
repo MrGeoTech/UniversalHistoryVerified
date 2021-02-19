@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -21,18 +20,14 @@ import net.md_5.bungee.api.ChatColor;
 
 public class UniversalHistoryCommand implements CommandExecutor {
 	
-	private static final String IP = "localhost";
+	private static final String IP = "geopixel.ddns.net";
 	private static final int PORT = 50000;
 	
 	private UniversalHistory main;
-	public static HashMap<Player,ItemStack> books;
-	public static HashMap<Player,ItemStack> prev;
 	
 	public UniversalHistoryCommand(UniversalHistory main) {
 		this.main = main;
 		this.main.getCommand("uh").setExecutor(this);
-		books = new HashMap<Player,ItemStack>();
-		prev = new HashMap<Player,ItemStack>();
 	}
 
 	@Override
@@ -54,12 +49,17 @@ public class UniversalHistoryCommand implements CommandExecutor {
 		}
 		if (type.equalsIgnoreCase("check")) {
 			Bukkit.getScheduler().runTaskAsynchronously(this.main, new Runnable() {
-				@SuppressWarnings("deprecation")
 				@Override
 				public void run() {
 					try {
-						String uuid = UUIDFetcher.getUUIDOf(player).toString();
-						System.out.println(uuid);
+						String uuid;
+						try {
+							uuid = UUIDFetcher.getUUIDOf(player).toString();
+						} catch (Exception e) {
+							System.err.println(sender.getName() + " tried to get the uuid of " + player + " which could not be found/doesn't exist!");
+							sender.sendMessage(ChatColor.RED + player + "'s uuid could not be found/doesn't exist!");
+							return;
+						}
 						Socket server = new Socket(IP, PORT);
 						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
 						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
@@ -92,12 +92,9 @@ public class UniversalHistoryCommand implements CommandExecutor {
 							if (playerUUID.size() != 0) {
 								ItemStack book = new BookHandler(player, playerUUID, playerName, staffUUID, staffName, serverIP, date, ptype, reason).buildBook();
 								Player staff = (Player) sender;
-								if (Bukkit.getBukkitVersion().split("-")[0].equalsIgnoreCase("1.8")) {
-									prev.put(staff, staff.getItemInHand());
-								} else {
-									prev.put(staff, staff.getInventory().getItemInMainHand());
+								if (!staff.getInventory().addItem(book).isEmpty()) {
+									staff.getInventory().setItem(8, book);
 								}
-								books.put(staff, book);
 							} else {
 								sender.sendMessage(ChatColor.RED + "There was no history for " + player + " in our database.");
 							}

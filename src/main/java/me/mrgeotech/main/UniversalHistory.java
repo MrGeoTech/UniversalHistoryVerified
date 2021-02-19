@@ -14,9 +14,6 @@ public class UniversalHistory extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		if (!this.available(50000)) {
-			System.err.println("Port 50000 is not open! This plugin will not be able to get any information from the database. Please open port 50000 or you WILL get errors!");
-		}
 		uhc = new UniversalHistoryCommand(this);
 	}
 	
