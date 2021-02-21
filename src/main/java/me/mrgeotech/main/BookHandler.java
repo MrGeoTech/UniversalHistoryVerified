@@ -42,7 +42,18 @@ public class BookHandler {
 		meta.setTitle(playerName.get(0) + "'s History");
 		if (playerUUID.size() != 0) {
 			for (int i = 0; playerUUID.size() > i; i++) {
-				meta.addPage(color("&5" + playerName.get(i) + "&0(&d" + playerUUID.get(i) + "&0) has a &c" + type.get(i) + "&0 on &5" + serverIP.get(i) + "&0, given by &5" + staffName.get(i) + "&0(&d" + staffUUID.get(i) + "&0) for \"&a" + reason.get(i) + "&0\" at &2" + date.get(i)));
+				if (meta.getPageCount() <= 49) {
+					String punishment = color("&5" + playerName.get(i) + "&0(&d" + playerUUID.get(i) + "&0) has a &c" + type.get(i) + "&0 on &5" + serverIP.get(i) + "&0, given by &5" + staffName.get(i) + "&0(&d" + staffUUID.get(i) + "&0) for \"&a" + reason.get(i) + "&0\" at &2" + date.get(i));
+					if (punishment.length() > 256) {
+						String punishmentTwo = punishment.substring(255);
+						meta.addPage(punishment);
+						meta.addPage(punishmentTwo);
+					} else {
+						meta.addPage(punishment);
+					}
+				} else {
+					meta.addPage(ChatColor.DARK_RED + "Unfortuatly, this player has more punishments that can be displayed with the current book system. Please use either the console or contact MrGeoTech#9470 for the rest of the punishments.");
+				}
 			}
 		} else {
 			meta.addPage(ChatColor.BLACK + "There are not recorded punishments for " + player + ".");

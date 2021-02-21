@@ -19,6 +19,14 @@
   </properties>
 
 <repositories>
+	<repository> 
+	  <id>confuser-repo</id> 
+	  <url>http://ci.frostcast.net/plugin/repository/everything</url> 
+	</repository>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
     <!-- This adds the Spigot Maven repository to the build -->
     <repository>
         <id>spigot-repo</id>
@@ -27,6 +35,17 @@
 </repositories>
 
   <dependencies>
+    <dependency>
+      <groupId>me.confuser</groupId>
+      <artifactId>BanManager</artifactId>
+      <version>5.10.0</version>
+    </dependency>
+  <dependency>
+    <groupId>com.gitlab.ruany</groupId>
+    <artifactId>LiteBansAPI</artifactId>
+    <version>0.3.4</version>
+    <scope>provided</scope>
+  </dependency>
   <dependency>
     <groupId>com.googlecode.json-simple</groupId>
     <artifactId>json-simple</artifactId>

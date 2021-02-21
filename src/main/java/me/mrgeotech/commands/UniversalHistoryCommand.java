@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
@@ -39,18 +36,17 @@ public class UniversalHistoryCommand implements CommandExecutor {
 			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cI'm sorry but you don't have sufficient permissions to execute this command. If you think that this is an error, contact the server administrator."));
 			return true;
 		}
-		if (!(args.length == 2 || args.length == 9)) {
-			sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4Improper usage! /uh <check/add> <name>"));
+		if (args.length < 1) {
+			sender.sendMessage(ChatColor.DARK_RED + "Improper usage! /uh <check/add>");
 			return true;
 		}
 		String type = args[0];
-		String player = args[1];
-		if (type.equalsIgnoreCase("add")) {
-			sender.sendMessage(ChatColor.RED + "Sorry but you do not have the " + ChatColor.DARK_RED + "TRUSTED" + ChatColor.RED + "version of this plugin!");
-			sender.sendMessage(ChatColor.RED + "If you would like to get verified, join the discord at \"" + ChatColor.AQUA + "https://discord.gg/QWt4SsBBWV\"" + ChatColor.RED + " to become verified.");
-			return true;
-		}
 		if (type.equalsIgnoreCase("check")) {
+			if (args.length != 2) {
+				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&4Improper usage! /uh check <name>"));
+				return true;
+			}
+			String player = args[1];
 			Bukkit.getScheduler().runTaskAsynchronously(this.main, new Runnable() {
 				@Override
 				public void run() {
@@ -82,14 +78,14 @@ public class UniversalHistoryCommand implements CommandExecutor {
 						ArrayList<String> ptype = new ArrayList<String>();
 						ArrayList<String> reason = new ArrayList<String>();
 						for (int i = 0; (in.size() / 8) > i; i++) {
-							playerUUID.add(in.get(i));
-							playerName.add(in.get(i + 1));
-							staffUUID.add(in.get(i + 2));
-							staffName.add(in.get(i + 3));
-							serverIP.add(in.get(i + 4));
-							date.add(in.get(i + 5));
-							ptype.add(in.get(i + 6));
-							reason.add(in.get(i + 7));
+							playerUUID.add(in.get(i * 8));
+							playerName.add(in.get((i * 8) + 1));
+							staffUUID.add(in.get((i * 8) + 2));
+							staffName.add(in.get((i * 8) + 3));
+							serverIP.add(in.get((i * 8) + 4));
+							date.add(in.get((i * 8) + 5));
+							ptype.add(in.get((i * 8) + 6));
+							reason.add(in.get((i * 8) + 7));
 						}
 						if (sender instanceof Player) {
 							if (playerUUID.size() != 0) {
@@ -120,50 +116,43 @@ public class UniversalHistoryCommand implements CommandExecutor {
 			return true;
 		}
 		if (type.equalsIgnoreCase("add")) {
-			final String staff = args[2];
-			final String punishment = args[3];
-			final String reason = args[4];
-			final String length;
-			if (args.length == 6) {
-				length = args[5];
-			} else {
-				length = null;
+			if (args.length < 6) {
+				sender.sendMessage(ChatColor.DARK_RED + "Improper usage! /uh add <playerName> <staffName> <punishmentType> <length> <reason>");
+				sender.sendMessage(ChatColor.DARK_RED + "If the punishment does not have a length, then enter \"null\" into the length area.");
+				return true;
 			}
-			Bukkit.getScheduler().runTaskAsynchronously(main, new Runnable() {
-				@Override
-				public void run() {
-					try {
-						String uuid;
-						String staffUUID;
-						try {
-							uuid = UUIDFetcher.getUUIDOf(player).toString();
-							staffUUID = UUIDFetcher.getUUIDOf(staff).toString();
-						} catch (Exception e) {
-							System.err.println(sender.getName() + " tried to get the uuid of " + player + " which could not be found/doesn't exist!");
-							sender.sendMessage(ChatColor.RED + player + "'s uuid could not be found/doesn't exist!");
-							return;
-						}
-						Socket server = new Socket(IP, PORT);
-						ObjectOutputStream outStream = new ObjectOutputStream(server.getOutputStream());
-						ObjectInputStream inStream = new ObjectInputStream(server.getInputStream());
-						String[] out = {"add",
-								uuid,
-								player,
-								staffUUID,
-								staff,
-								Bukkit.getIp(),
-								ZonedDateTime.ofInstant(Instant.now(), ZoneId.of("America/Chicago")).toString(),
-								(args.length == 6) ? punishment : punishment + "(Length=" + length + ")",
-								reason};
-						outStream.writeObject(out);
-						String response = inStream.readUTF();
-						sender.sendMessage(response);
-						server.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+			ArrayList<String> sections = new ArrayList<String>();
+			for (String s : args) {
+				sections.add(s);
+			}
+			sections.remove(0);
+			sections.remove(0);
+			sections.remove(0);
+			sections.remove(0);
+			sections.remove(0);
+			String player = args[1];
+			String staff = args[2];
+			String punishment = args[3];
+			String length = args[4];
+			String reason = "";
+			try {
+				reason += sections.get(0);
+				sections.remove(0);
+				for (String s : sections) {
+					reason += " " + s;
 				}
-			});
+			} catch (Exception ex) {
+				reason = "No reason given";
+			}
+			if (reason.length() >= 255) {
+				sender.sendMessage(ChatColor.DARK_RED + "The length of the reason is too long for our database! Please fix this and then try again.");
+				return true;
+			}
+			if (staff.equalsIgnoreCase("console")) {
+				this.main.getPunishmentHandler().sendPunishment(player, staff, staff, reason, punishment, length);
+			} else {
+				this.main.getPunishmentHandler().sendPunishment(player, staff, reason, punishment, length);
+			}
 		}
 		return false;
 	}
